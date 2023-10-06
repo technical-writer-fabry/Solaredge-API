@@ -1,0 +1,434 @@
+{
+	"info": {
+		"_postman_id": "ee2addbc-95c6-4248-b840-483009bc5f87",
+		"name": "solar edge monitoring API",
+		"description": "## Summary\n\nIf you have read this introduction, you know the claim behind the project and the basic preparation steps.\n\n## Introduction\n\nThis collection has no claim to completeness, correctness or last technical finesse. The goal is to prepare a PostMan collection to monitor the API of solaredge so you can read out data with comparatively little effort.\n\nThe data display can otherwise be done easily and quickly with the corresponding app, but there is no, as far as I know, option to save data.\n\n## Preparation\n\nYou need access data to exchange data with an API. You will receive these after your registration at [https://monitoring.solaredge.com/solaredge-web/p/login](https://monitoring.solaredge.com/solaredge-web/p/login).\n\n1. Switch to **Admin** / **Site Access** and activate the option **API Access**.\n2. Copy the **API-Key** and the **Site ID**.  \n    The [solar edge API Guide here](http://www.solaredge.com/files/pdfs/se_monitoring_api.pdf) is an excellent addition to this arbitrary collection.\n    \n\n## Get started\n\n1. Open the Collection in Postman.\n2. Hover with your mouse pointer over the name of the collection and tick the burger menu.\n3. Select `Edit`\n4. Select the `Variables` tab and enter the **API-Key** in the `Current value` column.\n5. Repeat your values with the **SiteId** and `Save`.\n6. Switch to the request named **Site List** and press `Send`.\n7. If you should receive `String\": \"Invalid token\"`, check your **API-Key**.  \n    It should have no additional elements like trailing spaces at the end.  \n    The **SiteId** is not sensitive in a similar way",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14296361",
+		"_collection_link": "https://martian-desert-834527.postman.co/workspace/d843fbd5-2cff-4755-a519-1baf85217068/collection/14296361-ee2addbc-95c6-4248-b840-483009bc5f87?action=share&source=collection_link&creator=14296361"
+	},
+	"item": [
+		{
+			"name": "1. Site Details",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/site/{{SiteId}}/details?api_key={{API_KEY}}&site={{SiteId}}",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						"site",
+						"{{SiteId}}",
+						"details"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						},
+						{
+							"key": "site",
+							"value": "{{SiteId}}"
+						}
+					]
+				},
+				"description": "This request gives you two pieces of relevant information. First, you get reassured that your access data are correctly set. Congratulations if that worked on the first try!  \nSecond, you receive several facts about the site. Please note or copy the `installationDate` as it is relevant for further requests.\n\n1. Select `1. Site Details`\n2. Tick `Send`\n    \n\nNext, you can check two options:\n\n- Are the `publicSettings` set to `false`? If not, switch to your account at the [solar edge platform](https://monitoring.solaredge.com/solaredge-web/p/login) and select `Admin` / `Site Access` and check the settings.\n- Use `CTRL` & `ALT` & `V` in Postman to check whether you prefer the horizontal or vertical view."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Details Energy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//use the parameter {{currentdate}} in your GET request.\r",
+							"//https://community.postman.com/t/how-to-pass-current-date-as-a-value-in-get-request/17303/3\r",
+							"var moment = require('moment');\r",
+							"\r",
+							"pm.environment.set('currentdate', moment().format((\"YYYY-MM-DD\")));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/site/{{SiteId}}/energy?api_key={{API_KEY}}&startDate=2023-01-01&endDate={{currentdate}}&timeUnit=MONTH",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						"site",
+						"{{SiteId}}",
+						"energy"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						},
+						{
+							"key": "startDate",
+							"value": "2023-01-01",
+							"description": "You can find out the start date of the installation in the request called Site Details."
+						},
+						{
+							"key": "endDate",
+							"value": "{{currentdate}}",
+							"description": "If you want to change this default, make sure to use the format YYYY-MM-DD"
+						},
+						{
+							"key": "timeUnit",
+							"value": "MONTH",
+							"description": "This value can be changed: DAY/WEEK/MONTH/YEAR"
+						}
+					]
+				},
+				"description": "This request provides you with information about the energy production of your photovoltaic system.\n\nPlease note that the results are output in **Wh**.\n\nA few additional details are required for this:\n\n- Which **time unit** is desired?  \n    DAY/WEEK/MONTH/YEAR are possible, MONTH is preset.\n- What is the **end date**?  \n    Thanks to [postman community](https://community.postman.com/), a pre-request script was created, that uses the current date. If you want to change the period, enter it in the `Params` tab under `endDate`.  \n    Ensure to use the format **YYYY-MM-DD**.\n- What is the **start date**?  \n    You can find out the start date of the installation in the request named \\`1. Site Details\\`.\n    \n\n1. Switch to the `Params` tab.\n2. Check or correct the entry at `timeUnit`.\n3. If you want to change the date at `endDate`, note the input format.\n4. Add the date of the startup to `startDate`.\n5. `Save` your entries.\n6. Tick `Send`."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Energy in 15-minute intervals last 30 days",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//use the parameter {{currentdate}} in your GET request.\r",
+							"// source: https://community.postman.com/t/how-to-pass-current-date-as-a-value-in-get-request/17303/3\r",
+							"\r",
+							"var moment = require('moment');\r",
+							"pm.environment.set('currentdatetime', moment().format(('YYYY-MM-DD HH:mm:ss')));\r",
+							"\r",
+							"// Calculate the valid startTime by subtracting 30 days from the current datetime\r",
+							"var validStartTime = moment().subtract(30, 'days').format('YYYY-MM-DD HH:mm:ss');\r",
+							"// Set the valid startTime as an environment variable\r",
+							"pm.environment.set('validStartTime', validStartTime);\r",
+							"\r",
+							"var fs = require('fs');\r",
+							"var moment = require('moment');\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/site/{{SiteId}}/power?api_key={{API_KEY}}&startTime={{validStartTime}}&endTime={{currentdatetime}}",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						"site",
+						"{{SiteId}}",
+						"power"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						},
+						{
+							"key": "startTime",
+							"value": "{{validStartTime}}",
+							"description": "the API is limited here to one month"
+						},
+						{
+							"key": "endTime",
+							"value": "{{currentdatetime}}",
+							"description": "so this time slot should not be extended"
+						}
+					]
+				},
+				"description": "This query provides details about the energy generation. A duration of 15 minutes is used as the **time unit**.  \nThis query retrieves a large volume of data, so the interval between the start and end times of **the query period is limited to 30 days**. Thanks to the Postman community, a `Pre-request script` could be added. This script defines the period to be the last thirty days.  \nIf you want to change the time period, change the specifications on the `Params` tab under `startTime` and `endTime`.    \nEnsure to use the format YYYY-MM-DD hh:mm:ss"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Overview Energy Output",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/ site/{{SiteId}}/overview?api_key={{API_KEY}}",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						" site",
+						"{{SiteId}}",
+						"overview"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						}
+					]
+				},
+				"description": "This request provides information about the **total energy production**.  \nThe results are updated every **five minutes**."
+			},
+			"response": []
+		},
+		{
+			"name": "5. Energy Production and Consumption in 15-minute intervals",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var moment = require('moment');\r",
+							"\r",
+							"// Set the currentdatetime environment variable\r",
+							"pm.environment.set('currentdatetime', moment().format('YYYY-MM-DD HH:mm:ss'));\r",
+							"\r",
+							"// Calculate the valid startTime by subtracting 30 days from the current datetime\r",
+							"var validStartTime = moment().subtract(30, 'days').format('YYYY-MM-DD HH:mm:ss');\r",
+							"\r",
+							"// Set the valid startTime as an environment variable\r",
+							"pm.environment.set('validStartTime', validStartTime);\r",
+							"\r",
+							"// Calculate the current time\r",
+							"var currentTime = moment().format('YYYY-MM-DD HH:mm:ss');\r",
+							"\r",
+							"console.log('Start Time:', validStartTime);\r",
+							"console.log('End Time:', currentTime);\r",
+							"console.log('Current Time:', pm.environment.get('currentdatetime'));\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/site/{{SiteId}}/powerDetails?api_key={{API_KEY}}&startTime={{validStartTime}}&endTime={{currentdatetime}}&meters=CONSUMPTION%2CPRODUCTION",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						"site",
+						"{{SiteId}}",
+						"powerDetails"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						},
+						{
+							"key": "startTime",
+							"value": "{{validStartTime}}"
+						},
+						{
+							"key": "endTime",
+							"value": "{{currentdatetime}}"
+						},
+						{
+							"key": "meters",
+							"value": "CONSUMPTION%2CPRODUCTION"
+						}
+					]
+				},
+				"description": "This request lists the production and below that the consumption of energy in 15-minute intervals. Thanks to the Postman community, a `Pre-request script` defines the period, which is limited to a maximum of thirty days due to the amount of data.  \nEnter the period on the `Params` tab under `startTime` and `endTime` if you want to change it.  \nEnsure to use the format YYYY-MM-DD hh:mm:ss.  \nYou can edit the default **PRODUCTION,CONSUMPTION** for `meters`, separate your terms with **,**."
+			},
+			"response": []
+		},
+		{
+			"name": "6. Site Power Flow",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//use the parameter {{currentdate}} in your GET request.\r",
+							"// source: https://community.postman.com/t/how-to-pass-current-date-as-a-value-in-get-request/17303/3\r",
+							"\r",
+							"var moment = require('moment');\r",
+							"pm.environment.set('currentdatetime', moment().format(('YYYY-MM-DD HH:mm:ss')));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/site/{{SiteId}}/currentPowerFlow?api_key={{API_KEY}}&startTime=2023-06-20 00:00:00&endTime={{currentdatetime}}",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						"site",
+						"{{SiteId}}",
+						"currentPowerFlow"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						},
+						{
+							"key": "startTime",
+							"value": "2023-06-20 00:00:00",
+							"description": "Storage power measured end time in yyyy-MM-DD hh:mm:ss format "
+						},
+						{
+							"key": "endTime",
+							"value": "{{currentdatetime}}",
+							"description": "Storage power measured end time in yyyy-MM-DD hh:mm:ss format "
+						},
+						{
+							"key": "serials",
+							"value": "",
+							"description": "Return data only for specific battery serial numbers; the list is comma separated. If omitted, the response includes all the batteries in the site ",
+							"disabled": true
+						}
+					]
+				},
+				"description": "This request shows the power flow of your photovoltaic system and, if available, the battery status.\n\nYou will find information in **KW** for `GRID` on the energy delivered to the grid,\nfor `LOAD` on the demand of the connected consumers and\nfor `PV` about the production.  \n`STORAGE` shows the battery status in percent."
+			},
+			"response": []
+		},
+		{
+			"name": "7. Storage Information in 5-minute intervals",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//use the parameter {{currentdate}} in your GET request.\r",
+							"// source: https://community.postman.com/t/how-to-pass-current-date-as-a-value-in-get-request/17303/3\r",
+							"\r",
+							"var moment = require('moment');\r",
+							"pm.environment.set('currentdatetime', moment().format(('YYYY-MM-DD HH:mm:ss')));\r",
+							"\r",
+							"// Calculate the valid7 startTime by subtracting 7 days from the current datetime\r",
+							"var currentminus7 = moment().subtract(7, 'days').format('YYYY-MM-DD HH:mm:ss');\r",
+							"\r",
+							"// Set the valid startTime as an environment variable\r",
+							"pm.environment.set('currentminus7', currentminus7);\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://monitoringapi.solaredge.com/site/{{SiteId}}/storageData?api_key={{API_KEY}}&startTime={{currentminus7}}&endTime={{currentdatetime}}",
+					"protocol": "https",
+					"host": [
+						"monitoringapi",
+						"solaredge",
+						"com"
+					],
+					"path": [
+						"site",
+						"{{SiteId}}",
+						"storageData"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "{{API_KEY}}"
+						},
+						{
+							"key": "startTime",
+							"value": "{{currentminus7}}",
+							"description": "maximum time range: last 7 days"
+						},
+						{
+							"key": "endTime",
+							"value": "{{currentdatetime}}"
+						}
+					]
+				},
+				"description": "This request lists some details about a possibly existing battery and its status in 5-minute intervals.  \nThanks to the Postman community, a Pre-request script defines the period, which is **limited to a maximum of seven days** due to the amount of data.  \nEnter the period on the `Params tab` under `startTime` and `endTime` if you want to change it.  \nEnsure to use the format **YYYY-MM-DD hh:mm:ss**."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "SiteId",
+			"value": "0000000",
+			"type": "string"
+		},
+		{
+			"key": "API_KEY",
+			"value": "getyourapikeybyportalandstaysafe",
+			"type": "string"
+		}
+	]
+}
