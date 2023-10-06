@@ -1,5 +1,8 @@
 # Solaredge-API
-A Postman Collection with Requests containing Preset Scripts
-I look forward to your feedback on this collection. With this, I want to provide Requests that I created using the Solaredge tutorial. 
+A Postman collection of seven requests to query information at a solar edge photovoltaic system.
 
-With the PostmanCommunity and ChatGPT, I was able to add scripts that make it much easier to use. Good luck with the use!
+I created the requests using the instructions that solar edge also provides. Thanks to the PostmanCommunity and ChatGPT, I could add some scripts to improve the usability.  
+
+I appreciate your feedback on this collection. 
+
+Have fun trying it out, and good luck with your photovoltaic system!
